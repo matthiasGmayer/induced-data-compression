@@ -73,3 +73,16 @@ def get_data_loaders(batch_size=24, shuffle=False, datasets=None, save_path="dat
         datasets = get_datasets(save_path)
     return {key: DataLoader(batch_size=batch_size, shuffle=shuffle, dataset=dataset)
             for key, dataset in datasets.items()}
+if __name__ == '__main__':
+    #testing
+    d = get_datasets()
+    l = list(d["simple", "train"])
+    assert len(l) == 24
+    assert len(set([tuple(r) for r in l])) == 24
+    for a, b in l:
+        assert a[0].item() == b.item()
+    l = list(d["simple", "test"])
+    assert len(l) == 8
+    assert len(set([tuple(r) for r in l])) == 8
+    for a, b in l:
+        assert a[0].item() == b.item()
