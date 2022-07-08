@@ -12,15 +12,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class Net(nn.Module):
-    def __init__(self, input_num_bits=5):
+    def __init__(self, input_num_bits=5, hidden_layers=1, width=5):
         super(Net, self).__init__()
-        x = 5
         self.sequential = nn.Sequential(
-            nn.Linear(input_num_bits, x),
+            nn.Linear(input_num_bits, width),
             nn.ReLU(),
-            nn.Linear(x, x),
-            nn.ReLU(),
-            nn.Linear(x, 1)
+            *(nn.Sequential(
+                nn.Linear(width, width),
+                nn.ReLU()
+            ) for _ in range(hidden_layers)),
+            nn.Linear(width, 1)
         )
 
     def forward(self, x):
@@ -54,7 +55,7 @@ def train(net, train_loader, abs_tol=1e-05, cut_off=20_000):
             optimizer.step()
         if epoch % 500 == 0:
             print(f"epoch={epoch}, loss={loss}")
-        if epoch > 20000:
+        if epoch > cut_off:
             unsuccessful = True
             break
     return not unsuccessful, epoch, loss
