@@ -1,6 +1,6 @@
 #!/bin/python3
-from data import get_data_loaders
-from model import train, Net
+from induced_data_compression.data import get_data_loaders
+from induced_data_compression.model import train, Net
 import os
 import torch
 from glob import glob
