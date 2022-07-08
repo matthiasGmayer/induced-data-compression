@@ -49,7 +49,7 @@ def train(net, train_loader, abs_tol=1e-05, cut_off=20_000):
         for i, data in enumerate(train_loader, 0):
             inputs, labels = data
             optimizer.zero_grad()
-            outputs = net(inputs.to("cuda"))[:, 0]
+            outputs = net(inputs.to(device))[:, 0]
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
