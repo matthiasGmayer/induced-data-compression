@@ -28,6 +28,29 @@ class Net(nn.Module):
     def forward(self, x):
         return self.sequential(x)
 
+def load_models(func_type, width, hidden_layers, load_range, save_path="../models"):
+    """
+    load all models in "{save_path}/h{hidden_layers}w{width}/{func_type}/{r}" where r is in load_range
+    If one model is not found, the function returns.
+    :param func_type: e.g. "complex", "simple"
+    :param width: the width of the net
+    :param hidden_layers: the num. of hidden layers of the net
+    :param load_range: Either int to load range(load_range) or a sequence to load all models in the sequence
+    :param save_path: the path to the folder where the models are saved
+    :return: the loaded models in a list
+    """
+    if isinstance(load_range, int):
+        load_range = range(load_range)
+    path = f"{save_path}/h{hidden_layers}w{width}/{func_type}"
+    models = []
+    for i in load_range:
+        try:
+            models.append(torch.load(path+f"/{i}.pt"))
+        except FileNotFoundError as e:
+            print(e)
+            print(f"Attempt at loading {i}th model failed, returning {i} loaded models")
+            break
+    return models
 
 def train(net, train_loader, abs_tol=1e-05, cut_off=20_000):
     """
