@@ -18,15 +18,15 @@ def train_models():
     width = 5
     s = f"h{hidden_layers}w{width}"
 
-    mkdir("models")
-    mkdir(f"models/{s}")
-    mkdir(f"models/{s}/simple")
-    mkdir(f"models/{s}/complex")
+    mkdir("../models")
+    mkdir(f"../models/{s}")
+    mkdir(f"../models/{s}/simple")
+    mkdir(f"../models/{s}/complex")
 
 
     # for func_type in ["simple", "complex"]:
     for func_type in ["complex"]:
-        offset = max((int(os.path.basename(s)[:-3]) for s in glob(f"models/{s}/{func_type}/*")),default=-1)+1
+        offset = max((int(os.path.basename(s)[:-3]) for s in glob(f"../models/{s}/{func_type}/*")),default=-1)+1
         for i in range(offset, num_models):
             unsuccessful = True
             while unsuccessful:
@@ -34,7 +34,7 @@ def train_models():
                 trainloader = data_loaders[func_type, "train"]
                 success,_,_ = train(net, trainloader)
                 unsuccessful = not success
-            torch.save(net, f"models/{s}/{func_type}/{i}.pt")
+            torch.save(net, f"../models/{s}/{func_type}/{i}.pt")
 
 if __name__ == '__main__':
     train_models()

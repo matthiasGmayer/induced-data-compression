@@ -8,6 +8,7 @@ from collections import defaultdict
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 

@@ -20,7 +20,7 @@ def complex_func(bits):
     return torch.tensor(random.choices(population=[0, 1], k=bits.shape[0]), dtype=torch.int32)
 
 
-def generate_datasets(test_size=8, save_path="datasets"):
+def generate_datasets(test_size=8, save_path="../datasets"):
     """
   generates and saves the datasets in {save_path}
   """
@@ -40,14 +40,14 @@ def generate_datasets(test_size=8, save_path="datasets"):
     torch.save(complex_func(test_inputs), f"{save_path}/test_complex_truths.pt")
 
 
-def _delete_datasets(save_path="datasets"):
+def _delete_datasets(save_path="../datasets"):
     for data_type in ["simple", "complex"]:
         for train_type in ["train", "test"]:
             os.remove(f"{save_path}/{train_type}_inputs.pt")
             os.remove(f"{save_path}/{train_type}_{data_type}_truths.pt")
 
 
-def get_datasets(save_path="datasets", test_size=8):
+def get_datasets(save_path="../datasets", test_size=8):
     """
   loads the datasets as torch.Dataset into a dict
   If there are no datasets presents, they are generated.
@@ -68,13 +68,15 @@ def get_datasets(save_path="datasets", test_size=8):
     return datasets
 
 
-def get_data_loaders(batch_size=24, shuffle=False, datasets=None, save_path="datasets"):
+def get_data_loaders(batch_size=24, shuffle=False, datasets=None, save_path="../datasets"):
     if datasets is None:
         datasets = get_datasets(save_path)
     return {key: DataLoader(batch_size=batch_size, shuffle=shuffle, dataset=dataset)
             for key, dataset in datasets.items()}
+
+
 if __name__ == '__main__':
-    #testing
+    # testing
     d = get_datasets()
     l = list(d["simple", "train"])
     assert len(l) == 24
