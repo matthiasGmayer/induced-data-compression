@@ -1,3 +1,6 @@
+import torch
+
+
 def unique(sequence, key=id):
     """
     :param sequence: the sequence to be filtered
@@ -9,3 +12,6 @@ def unique(sequence, key=id):
         if key(s) not in d:
             d.add(key(s))
             yield s
+
+def load_info(type,load_range):
+    return torch.load(f"info_{type}_{load_range}.pt")

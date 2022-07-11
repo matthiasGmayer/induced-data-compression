@@ -201,8 +201,7 @@ def get_activations_from_loaded(model_type, hidden_layers, width, load_range, nu
             model(inputs)
     return activations
 
-
-def get_mutual_information_for_activations(activations):
+def get_mutual_information_for_activations(activations,tol=1e-3):
     """
     :param activations: the activations of the models
     :return: tensor of shape (m,m,a,a) where m=num_models, a=num_activation_layers
@@ -223,11 +222,12 @@ def get_mutual_information_for_activations(activations):
         ratio_information_list[j, i] = ratio_info.T
 
     for i in range(num_models):
+        print(f"{i}/{num_models}")
         for j in range(i + 1, num_models):
-            output = all_mutual_total_and_ratio_information(activations[i], activations[j])
+            output = all_mutual_total_and_ratio_information(activations[i], activations[j],tol=tol)
             assign(i,j, output)
     for i in range(num_models):
-        output = all_mutual_total_and_ratio_information(activations[i], activations[i])
+        output = all_mutual_total_and_ratio_information(activations[i], activations[i],tol=tol)
         assign(i, i, output)
     return mutual_information_list, total_information_list, ratio_information_list
 
@@ -254,22 +254,25 @@ if __name__ == '__main__':
     num_bits = 5
     hidden_layers = 3
     width = 5
-    load_range = 3
-    activations = get_activations_from_loaded("complex", hidden_layers=hidden_layers,
-                                              width=width, num_bits=num_bits, load_range=load_range)
-    mut_info, tot_info, ratio_info = get_mutual_information_for_activations(activations)
+    load_range = 30
+    for func_type in ["complex","simple"]:
+        activations = get_activations_from_loaded(func_type, hidden_layers=hidden_layers,
+                                                  width=width, num_bits=num_bits, load_range=load_range)
+        info = get_mutual_information_for_activations(activations)
+        torch.save(info, f"info_{func_type}_{load_range}.pt")
+        mut_info, tot_info, ratio_info = info
 
 
     # print(mut_info<=tot_info)
     # assert torch.all(mut_info<=tot_info+1e-3)
 
-    a,b = [0,0,1],[1,2,2]
-    m = mut_info[a,b].detach().numpy()
-    t = tot_info[a,b].detach().numpy()
-    r = ratio_info[a,b].detach().numpy()
-    lines = [str(a).splitlines() for a in [m,t,r]]
-    for l in zip(*lines):
-        print(*l, sep=" \t")
+    # a,b = [0,0,1],[1,2,2]
+    # m = mut_info[a,b].detach().numpy()
+    # t = tot_info[a,b].detach().numpy()
+    # r = ratio_info[a,b].detach().numpy()
+    # lines = [str(a).splitlines() for a in [m,t,r]]
+    # for l in zip(*lines):
+    #     print(*l, sep=" \t")
 
 
     # torch.set_printoptions(threshold=100_000)
