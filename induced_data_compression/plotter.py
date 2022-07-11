@@ -80,7 +80,6 @@ def plot_similarity():
         similarity = torch.sum(torch.amax(ratio_info, dim=2),dim=2)+ torch.sum(torch.amax(ratio_info, dim=3),dim=2)
         plot_lines([sorted(l.tolist()) for l in similarity],title=f"{func_type}_similarity_30_sorted")
         plot_lines([l.tolist() for l in similarity],title=f"{func_type}_similarity_30_unsorted")
-        plt.
         plt.hist(similarity)
 
 
