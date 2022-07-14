@@ -6,6 +6,8 @@ from induced_data_compression.data import get_inputs
 SEED = 42
 random.seed(SEED)
 torch.manual_seed(SEED)
+_default_save_path= "../datasets"
+_default_dataset="/fuzzy"
 
 def fuzzy_not(a: float) -> float:
     return 1 - a
@@ -36,7 +38,7 @@ def simple_fuzzy_func(inputs: torch.Tensor) -> torch.Tensor:
 def complex_fuzzy_func(inputs: torch.Tensor) -> torch.Tensor:
     return torch.tensor([fuzzy_xor(a.item(), fuzzy_xor(b.item(), c.item())) for (a, b, c) in inputs])
 
-def generate_datasets(train_size: int = 4, test_size: int = 4, num_bits: int = 3, save_path="../datasets"):
+def generate_datasets(train_size: int = 4, test_size: int = 4, num_bits: int = 3, save_path=_default_save_path, dataset=_default_dataset):
     """
     generates and saves the datasets in {save_path}
     """
@@ -51,20 +53,20 @@ def generate_datasets(train_size: int = 4, test_size: int = 4, num_bits: int = 3
     train_inputs, test_inputs = inputs[test_size:], inputs[:test_size]
     if not os.path.exists(save_path):
         os.mkdir(save_path)
-    torch.save(train_inputs, f"{save_path}/fuzzy_train_inputs.pt")
-    torch.save(test_inputs, f"{save_path}/fuzzy_test_inputs.pt")
+    torch.save(train_inputs, f"{save_path}/{dataset}/train_inputs.pt")
+    torch.save(test_inputs, f"{save_path}/{dataset}/test_inputs.pt")
     print(inputs)
     print(simple_fuzzy_func(train_inputs))
     print(complex_fuzzy_func(train_inputs))
-    torch.save(simple_fuzzy_func(train_inputs), f"{save_path}/train_fuzzy_simple_truths.pt")
-    torch.save(simple_fuzzy_func(test_inputs), f"{save_path}/test_fuzzy_simple_truths.pt")
-    torch.save(complex_fuzzy_func(train_inputs), f"{save_path}/train_fuzzy_complex_truths.pt")
-    torch.save(complex_fuzzy_func(test_inputs), f"{save_path}/test_fuzzy_complex_truths.pt")
+    torch.save(simple_fuzzy_func(train_inputs), f"{save_path}/{dataset}/train_simple_truths.pt")
+    torch.save(simple_fuzzy_func(test_inputs), f"{save_path}/{dataset}/test_simple_truths.pt")
+    torch.save(complex_fuzzy_func(train_inputs), f"{save_path}/{dataset}/train_complex_truths.pt")
+    torch.save(complex_fuzzy_func(test_inputs), f"{save_path}/{dataset}/test_complex_truths.pt")
 
 
 def main():
     # inputs = get_inputs(num_bits=3)
-    generate_datasets(train_size=12, test_size=4, num_bits=3)
+    generate_datasets(train_size=32, test_size=8, num_bits=3)
     # simple_outputs = t.tensor([fuzzy_implies(a, fuzzy_implies(b, c)) for (a, b, c) in inputs])
     # complex_outputs = t.tensor([fuzzy_xor(a, fuzzy_xor(b, c)) for (a, b, c) in inputs])
     # print(simple_outputs)
