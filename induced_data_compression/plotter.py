@@ -14,6 +14,8 @@ from matplotlib import cm
 from matplotlib.colors import Normalize 
 from scipy.interpolate import interpn
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     """
     Scatter plot colored by 2d histogram
@@ -148,6 +150,28 @@ def plot_similarity():
         plt.show()
 
 
+def plot_3d(func,title, n=10):
+    step = 1/(n-1)
+    x,y = torch.meshgrid(torch.arange(0,1+step/2,step), torch.arange(0,1+step/2, step), indexing="xy")
+    xf = x.flatten()
+    yf = y.flatten()
+    xd = xf.to(device)
+    yd = yf.to(device)
+    inputs = torch.cat((xd[None],yd[None])).T
+    zf = func(inputs).to('cpu')
+    z = zf.unflatten(dim=0, sizes=(n,n))
+
+    fig = plt.figure()
+    ax = plt.axes(projection="3d")
+    ax.plot_surface(x.numpy(),y.numpy(),z.numpy())
+    ax.set_title(title)
+    plt.savefig(f"{title}.png")
+    plt.show()
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -156,6 +180,9 @@ if __name__ == '__main__':
     width = 5
     load_range = 100
     tol=1e-5
+
+    func = lambda x:x[:,0]*x[:,1]
+    plot_3d(func,"x*y")
 
     # mut_info, tot_info, ratio_info = load_info("simple", 30)
     #
@@ -175,6 +202,6 @@ if __name__ == '__main__':
 
 
     # plot_similarity()
-    for info_type in ["total","mutual","ratio"]:
+    # for info_type in ["total","mutual","ratio"]:
         # plot_same_layer_different_networks("scatter",info_type=info_type)
-        plot_information_each_layer("scatter",info_type=info_type)
+        # plot_information_each_layer("scatter",info_type=info_type)

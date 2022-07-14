@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 device = "cuda" if torch.cuda.is_available() else "cpu"
 _default_save_path = "../datasets"
 _default_dataset = "projection_and_random"
+_default_func_types = ["simple", "complex"]
 
 
 def get_inputs(num_bits: int = 5) -> torch.Tensor:
@@ -51,7 +52,7 @@ def _delete_datasets(save_path=_default_save_path, dataset=_default_dataset):
             os.remove(f"{save_path}/{dataset}/{train_type}_{data_type}_truths.pt")
 
 
-def get_datasets(save_path=_default_save_path, dataset=_default_dataset, test_size=8):
+def get_datasets(save_path=_default_save_path, dataset=_default_dataset, test_size=8, func_types=_default_func_types):
     """
   loads the datasets as torch.Dataset into a dict
   If there are no datasets presents, they are generated.
@@ -63,18 +64,26 @@ def get_datasets(save_path=_default_save_path, dataset=_default_dataset, test_si
     datasets = {}
     if dataset == _default_dataset and not os.path.exists(save_path+"/"+dataset + "/train_inputs.pt"):
         generate_datasets(test_size, save_path)
-    for data_type in ["simple", "complex"]:
+    if func_types is None:
         for train_type in ["train", "test"]:
             inputs = torch.load(f"{save_path}/{dataset}/{train_type}_inputs.pt").to(torch.float).to(device)
-            truths = torch.load(f"{save_path}/{dataset}/{train_type}_{data_type}_truths.pt").to(torch.float).to(device)
+            truths = torch.load(f"{save_path}/{dataset}/{train_type}_truths.pt").to(torch.float).to(device)
+            print(inputs.shape, truths.shape)
             loaded_dataset = data_utils.TensorDataset(inputs, truths)
-            datasets[data_type, train_type] = loaded_dataset
+            datasets[train_type] = loaded_dataset
+    else:
+        for data_type in func_types:
+            for train_type in ["train", "test"]:
+                inputs = torch.load(f"{save_path}/{dataset}/{train_type}_inputs.pt").to(torch.float).to(device)
+                truths = torch.load(f"{save_path}/{dataset}/{train_type}_{data_type}_truths.pt").to(torch.float).to(device)
+                loaded_dataset = data_utils.TensorDataset(inputs, truths)
+                datasets[data_type, train_type] = loaded_dataset
     return datasets
 
 
-def get_data_loaders(batch_size=24, shuffle=False, datasets=None, save_path=_default_save_path, dataset=_default_dataset):
+def get_data_loaders(batch_size=24, shuffle=False, datasets=None, save_path=_default_save_path, dataset=_default_dataset, func_types=_default_func_types):
     if datasets is None:
-        datasets = get_datasets(save_path,dataset)
+        datasets = get_datasets(save_path,dataset,func_types=func_types)
     return {key: DataLoader(batch_size=batch_size, shuffle=shuffle, dataset=dataset)
             for key, dataset in datasets.items()}
 

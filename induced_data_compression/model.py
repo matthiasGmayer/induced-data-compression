@@ -1,4 +1,5 @@
 #!/bin/python3
+import numpy as np
 import torch
 import math
 import random
@@ -45,9 +46,10 @@ class Net_with_activations(nn.Module):
             ) for _ in range(hidden_layers)),
             nn.Linear(width, 1)
         )
+
     def forward(self, x):
-        ls = [(x := l(x)) for l in self.sequential]
-        return ls
+        return [(x := l(x)) for l in self.sequential]
+
 
 def load_models(func_type, width, hidden_layers, load_range, input_num_bits, save_path="../models", dataset="projection_and_random"):
     """
@@ -126,16 +128,29 @@ def optimize_input_for_activations(net, input,
         optimizer.step()
         if epoch % 500 == 0:
             print(f"epoch={epoch}, -loss={-loss}")
-            print(input)
-            print(output)
+            # print(input)
+            # print(output)
     return -loss
 
 
+def print_output(output):
+    l = [o.to("cpu").tolist() for o in output]
+    for i in l:
+        for a in i:
+            print(f"{a:00.2f}", end=" ")
+        print()
 if __name__ == '__main__':
     state_dict = torch.load("../models/fuzzy/h3w10/simple/0.pt")
     net = Net_with_activations(input_num_bits=3,hidden_layers=3,width=10)
     net.load_state_dict(state_dict)
     net.to(device)
-    input = nn.Parameter(torch.tensor([ 1.,1.,1. ]))
+    state_dict2 = torch.load("../models/fuzzy/h3w10/simple/1.pt")
+    net2 = Net_with_activations(input_num_bits=3,hidden_layers=3,width=10)
+    net2.load_state_dict(state_dict2)
+    net2.to(device)
+    input = nn.Parameter(torch.tensor([ 1.,1.,1. ]).to(device))
     locations = [(0,0)]
-    optimize_input_for_activations(net,input,locations)
+    optimize_input_for_activations(net,input,locations, epochs=10000)
+    print(input)
+    print_output(net(input))
+    print_output(net2(input))
