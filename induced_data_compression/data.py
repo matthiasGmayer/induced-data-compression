@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def get_inputs(num_bits=5):
+def get_inputs(num_bits: int = 5) -> torch.Tensor:
     return torch.tensor([[int(char) for char in f"{i:0>{num_bits}b}"] for i in range(2 ** num_bits)], dtype=torch.int32)
 
 
@@ -38,6 +38,8 @@ def generate_datasets(test_size=8, save_path="../datasets"):
     torch.save(simple_func(test_inputs), f"{save_path}/test_simple_truths.pt")
     torch.save(complex_func(train_inputs), f"{save_path}/train_complex_truths.pt")
     torch.save(complex_func(test_inputs), f"{save_path}/test_complex_truths.pt")
+    print(train_inputs)
+    print(simple_func(train_inputs))
 
 
 def _delete_datasets(save_path="../datasets"):
